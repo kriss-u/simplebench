@@ -15,16 +15,16 @@ BenchmarkConfig parseArgs(int argc, char *argv[])
         switch (opt)
         {
         case 'e':
-            config.duration = std::stoi(optarg);
+            config.duration = static_cast<uint32_t>(std::stoul(optarg));
             break;
         case 'f':
             config.devicePath = optarg;
             break;
         case 'r':
-            config.rangeMB = std::stoi(optarg);
+            config.rangeMB = static_cast<uint32_t>(std::stoul(optarg));
             break;
         case 's':
-            config.requestKB = std::stoi(optarg);
+            config.requestKB = static_cast<uint32_t>(std::stoul(optarg));
             break;
         case 't':
             config.isRead = (optarg[0] == 'R');
@@ -33,7 +33,7 @@ BenchmarkConfig parseArgs(int argc, char *argv[])
             config.isSequential = (optarg[0] == 'S');
             break;
         case 'q':
-            config.numThreads = std::stoi(optarg);
+            config.numThreads = static_cast<uint32_t>(std::stoul(optarg));
             break;
         case 'd':
             config.useDirectIO = (optarg[0] == 'T');
@@ -53,10 +53,11 @@ int main(int argc, char *argv[])
     try
     {
         BenchmarkConfig config = parseArgs(argc, argv);
-        BenchmarkStats stats;
+        config.validate();
+
+        BenchmarkStats stats(config.outputPath);
         std::vector<std::unique_ptr<IOWorker>> workers;
 
-        // Start timing before creating workers
         stats.startBenchmark();
 
         // Create and start workers

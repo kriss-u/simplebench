@@ -3,6 +3,23 @@
 #include <iostream>
 #include <iomanip>
 
+BenchmarkStats::BenchmarkStats(const std::string &tracePath)
+{
+    traceFile.open(tracePath);
+    if (!traceFile.is_open())
+    {
+        throw std::runtime_error("Failed to open trace file: " + tracePath);
+    }
+}
+
+BenchmarkStats::~BenchmarkStats()
+{
+    if (traceFile.is_open())
+    {
+        traceFile.close();
+    }
+}
+
 void BenchmarkStats::startBenchmark()
 {
     startTime = Utils::getCurrentTime();
@@ -13,23 +30,28 @@ void BenchmarkStats::endBenchmark()
     endTime = Utils::getCurrentTime();
 }
 
-void BenchmarkStats::recordRequest(uint64_t bytes, double latency)
+void BenchmarkStats::recordRequest(uint32_t threadId, bool isRead, uint64_t offset,
+                                   uint64_t bytes, double latency)
 {
-    // Use the mutex to protect both the stats update and console output
     std::lock_guard<std::mutex> lock(statsMutex);
 
-    // Format output before printing to avoid interleaving
-    std::ostringstream oss;
-    oss << "Recording request: " << bytes << " bytes, latency "
-        << std::fixed << std::setprecision(6) << latency << " ms" << std::endl;
+    double timestamp = Utils::getCurrentTime() - startTime;
+    uint64_t sectorOffset = offset / 512;
+    uint64_t sectorSize = bytes / 512;
 
-    // Atomic operations for counters
+    // Write to trace file
+    traceFile << std::fixed << std::setprecision(6)
+              << timestamp << " "
+              << threadId << " "
+              << (isRead ? "R" : "W") << " "
+              << sectorOffset << " "
+              << sectorSize << " "
+              << latency << std::endl;
+
+    // Update statistics
     totalRequests.fetch_add(1);
     totalBytes.fetch_add(bytes);
     totalLatency += latency;
-
-    // Single atomic write to cout
-    std::cout << oss.str();
 }
 
 double BenchmarkStats::getTotalDuration() const
