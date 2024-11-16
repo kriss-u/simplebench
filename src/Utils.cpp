@@ -34,23 +34,7 @@ namespace Utils
         return dist(rng);
     }
 
-    std::string formatTraceLine(double timestamp, int threadId,
-                                bool isRead, uint64_t offset,
-                                uint64_t size, double latency)
-    {
-        std::ostringstream oss;
-        oss.precision(6);
-        oss << std::fixed
-            << timestamp << " "
-            << threadId << " "
-            << (isRead ? "R" : "W") << " "
-            << bytesToSectors(offset) << " "
-            << bytesToSectors(size) << " "
-            << latency;
-        return oss.str();
-    }
-
-    double getElapsedTime(double startTime)
+     double getElapsedTime(double startTime)
     {
         return getCurrentTime() - startTime;
     }
