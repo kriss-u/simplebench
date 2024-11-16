@@ -4,17 +4,8 @@
 #include <cstdint>
 #include "BenchmarkConfig.h"
 
-class ArgumentParser
+namespace ArgumentParser
 {
-public:
-    // Prevent instantiation
-    ArgumentParser() = delete;
-    ArgumentParser(const ArgumentParser &) = delete;
-    ArgumentParser &operator=(const ArgumentParser &) = delete;
-
-    // Main parsing function
-    static BenchmarkConfig parse(int argc, char *argv[]);
-
-    // Print usage information
-    static void printUsage();
-};
+    BenchmarkConfig parse(int argc, char *argv[]);
+    void printUsage();
+}
