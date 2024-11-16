@@ -1,58 +1,17 @@
 #include <iostream>
-#include <getopt.h>
-#include <BenchmarkConfig.h>
-#include <BenchmarkStats.h>
-#include <IOWorker.h>
-#include <vector>
 #include <iomanip>
-
-BenchmarkConfig parseArgs(int argc, char *argv[])
-{
-    BenchmarkConfig config;
-    int opt;
-    while ((opt = getopt(argc, argv, "e:f:r:s:t:p:q:d:o:")) != -1)
-    {
-        switch (opt)
-        {
-        case 'e':
-            config.duration = static_cast<uint32_t>(std::stoul(optarg));
-            break;
-        case 'f':
-            config.devicePath = optarg;
-            break;
-        case 'r':
-            config.rangeMB = static_cast<uint32_t>(std::stoul(optarg));
-            break;
-        case 's':
-            config.requestKB = static_cast<uint32_t>(std::stoul(optarg));
-            break;
-        case 't':
-            config.isRead = (optarg[0] == 'R');
-            break;
-        case 'p':
-            config.isSequential = (optarg[0] == 'S');
-            break;
-        case 'q':
-            config.numThreads = static_cast<uint32_t>(std::stoul(optarg));
-            break;
-        case 'd':
-            config.useDirectIO = (optarg[0] == 'T');
-            break;
-        case 'o':
-            config.outputPath = optarg;
-            break;
-        default:
-            throw std::runtime_error("Invalid arguments");
-        }
-    }
-    return config;
-}
+#include <vector>
+#include <thread>
+#include "ArgumentParser.h"
+#include "BenchmarkConfig.h"
+#include "BenchmarkStats.h"
+#include "IOWorker.h"
 
 int main(int argc, char *argv[])
 {
     try
     {
-        BenchmarkConfig config = parseArgs(argc, argv);
+        BenchmarkConfig config = ArgumentParser::parse(argc, argv);
         config.validate();
 
         BenchmarkStats stats(config.outputPath);
